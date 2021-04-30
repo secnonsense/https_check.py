@@ -1,7 +1,7 @@
 # https_check.py
 Tool to check HTTP and HTTPS sites and show any error exceptions  
 
-usage https_check.py -f FILE
+usage: https_check.py -f FILE
 
 "-x", "--headers" - "print the http headers of the http response"  
 "-b", "--body" - "print the body of the http response"  
