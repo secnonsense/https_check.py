@@ -7,15 +7,16 @@ def parse_args():
     parser.add_argument("-b", "--body", help="print the body of the http response", action="store_true")
     parser.add_argument("-r", "--results", help="print the url and status code of the successful http response", action="store_true")
     parser.add_argument("-s", "--save", help="Save the body to a file", action="store_true")
+    parser.add_argument("-o", "--output", help="Save the output of the command to a file", action="store_true")
     parser.add_argument("-f", "--file", help="Specify input file with a list of hostnames to be checked", action="store")
     return parser.parse_args()
 
 def request_https(host):
-    r=requests.get("https://" + host.strip())
+    r=requests.get("https://" + host.strip(),timeout=4)
     return r
 
 def request_http(host):
-    r=requests.get("http://" + host.strip())
+    r=requests.get("http://" + host.strip(),timeout=4)
     return r
 
 def print_hresponse(h):
@@ -25,6 +26,8 @@ def print_hresponse(h):
         print("Historical HTTP response code: " + str(response.status_code))
 
 def print_response(args,r):
+    if not "https" in r.url:
+                    print(f"**** {r.url} is an HTTP SITE!!! ****\n")
     print(f"HTTPS request for URL: {r.url} RESULT: {r.status_code}")
     for response in r.history:
         print("Historical HTTPS url: " + str(response.url))
@@ -38,31 +41,48 @@ def print_response(args,r):
     elif args.body:
         print ("============ BODY =============\n", r.text)
 
+def file_response(r,output,x):
+        if not "https" in r.url:
+                    output.write(f"\n**** {r.url} is an HTTP SITE!!! ****\n")
+        output.write(f"\n{x} request for URL: {r.url} RESULT: {r.status_code}\n")
+        for response in r.history:
+            output.write(f"Historical {x} url: {response.url}\n")
+            output.write(f"Historical {x} response code: {response.status_code}\n")  
+
+
 def main():
     args=parse_args()
     if not args.file:
         print("A file containing a list of domains is required for script input")
         quit()
     with open(args.file,"r") as file:
-        hosts = file.readlines() 
-        for host in hosts:
-            try:
-                h=request_http(host)
-                if args.results:
-                    print ("\n========= RESULTS ==========")
-                    print_hresponse(h)
-                if not "https" in h.url:
-                    print(f"**** {h.url} is an HTTP SITE!!! ****\n")
-            except requests.exceptions.RequestException as e:
-                print("**** EXCEPTION WITH HOST: " + host)
-                print(str(e)+"\n")
-            try:
-                r=request_https(host)
-                if args.results:
-                    print_response(args,r)
-            except requests.exceptions.RequestException as e:
-                print("**** EXCEPTION WITH HOST: " + host.strip() + "****\n")
-                print(str(e)+"\n")
+        hosts = file.readlines()
+        with open("https_output.txt",'w') as output:
+            for host in hosts:
+                try:
+                    h=request_http(host)
+                    if args.results:
+                        print ("\n========= RESULTS ==========")
+                        print_hresponse(h)
+                    if args.output:
+                        output.write("\n========= RESULTS ==========")
+                        file_response(h,output,x="HTTP")
+                except requests.exceptions.RequestException as e:
+                    print("\n**** EXCEPTION WITH HTTP HOST: " + host.strip() + " ****\n")
+                    print(str(e)+"\n")
+                    output.write("\n**** EXCEPTION WITH HTTP HOST: " + host.strip() + " ****\n")
+                    output.write(str(e)+"\n")
+                try:
+                    r=request_https(host)
+                    if args.results:
+                        print_response(args,r)
+                    if args.output:
+                        file_response(h,output,x="HTTPS")
+                except requests.exceptions.RequestException as e:
+                    print("\n**** EXCEPTION WITH HTTPS HOST: " + host.strip() + " ****\n")
+                    print(str(e)+"\n")
+                    output.write("\n**** EXCEPTION WITH HTTPS HOST: " + host.strip() + " ****\n")
+                    output.write(str(e)+"\n")
 
 if __name__ == "__main__":
     main()
