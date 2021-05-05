@@ -1,5 +1,6 @@
 import requests
 import argparse
+import socket
 
 def parse_args():
     parser = argparse.ArgumentParser()
@@ -66,10 +67,18 @@ def main():
                         print_hresponse(h)
                     if args.output:
                         output.write("\n========= RESULTS ==========")
+                        output.write(f"\nIP address: {socket.gethostbyname(host.strip())}")
+                        output.write(f"\nHostname: {host}")
                         file_response(h,output,x="HTTP")
                 except requests.exceptions.RequestException as e:
                     print("\n**** EXCEPTION WITH HTTP HOST: " + host.strip() + " ****\n")
                     print(str(e)+"\n")
+                    output.write("\n========= RESULTS ==========")
+                    try:
+                        output.write(f"\nIP address: {socket.gethostbyname(host.strip())}")
+                    except socket.gaierror as j:
+                        output.write(f'\nIP not resolved, error raised is {j}')
+                    output.write(f"\nHostname: {host}")
                     output.write("\n**** EXCEPTION WITH HTTP HOST: " + host.strip() + " ****\n")
                     output.write(str(e)+"\n")
                 try:
@@ -77,7 +86,7 @@ def main():
                     if args.results:
                         print_response(args,r)
                     if args.output:
-                        file_response(h,output,x="HTTPS")
+                        file_response(r,output,x="HTTPS")
                 except requests.exceptions.RequestException as e:
                     print("\n**** EXCEPTION WITH HTTPS HOST: " + host.strip() + " ****\n")
                     print(str(e)+"\n")
