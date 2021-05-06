@@ -78,7 +78,6 @@ def process_http(args,host,output):
             h=None
             process_output(host,output,h,e)
 
-
 def process_https(args,host,output):
     try:
         r=request_https(host)
