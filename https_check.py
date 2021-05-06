@@ -50,12 +50,7 @@ def file_response(r,output,x):
             output.write(f"Historical {x} url: {response.url}\n")
             output.write(f"Historical {x} response code: {response.status_code}\n")  
 
-
-def main():
-    args=parse_args()
-    if not args.file:
-        print("A file containing a list of domains is required for script input")
-        quit()
+def process_requests(args):
     with open(args.file,"r") as file:
         hosts = file.readlines()
         with open(args.output,'w') as output:
@@ -93,5 +88,14 @@ def main():
                     output.write("\n**** EXCEPTION WITH HTTPS HOST: " + host.strip() + " ****\n")
                     output.write(str(e)+"\n")
 
+
+
+def main():
+    args=parse_args()
+    if not args.file:
+        print("A file containing a list of domains is required for script input")
+        quit()
+    process_requests(args)
+    
 if __name__ == "__main__":
     main()
