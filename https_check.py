@@ -8,7 +8,7 @@ def parse_args():
     parser.add_argument("-b", "--body", help="print the body of the http response", action="store_true")
     parser.add_argument("-r", "--results", help="print the url and status code of the successful http response", action="store_true")
     parser.add_argument("-s", "--save", help="Save the body to a file", action="store_true")
-    parser.add_argument("-o", "--output", help="Save the output of the command to a file", action="store_true")
+    parser.add_argument("-o", "--output", help="Save the output of the command to a file", action="store")
     parser.add_argument("-f", "--file", help="Specify input file with a list of hostnames to be checked", action="store")
     return parser.parse_args()
 
@@ -58,7 +58,7 @@ def main():
         quit()
     with open(args.file,"r") as file:
         hosts = file.readlines()
-        with open("https_output.txt",'w') as output:
+        with open(args.output,'w') as output:
             for host in hosts:
                 try:
                     h=request_http(host)
