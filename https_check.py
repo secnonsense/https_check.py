@@ -47,8 +47,7 @@ def file_response(r,output,x):
         output.write(f"\n**** {r.url} is an HTTP SITE!!! ****\n")
     output.write(f"\n{x} request for URL: {r.url} RESULT: {r.status_code}\n")
     for response in r.history:
-        output.write(f"Historical {x} url: {response.url}\n")
-        output.write(f"Historical {x} response code: {response.status_code}\n")  
+        output.write(f"Historical {x} url: {response.url} RESULT: {response.status_code}\n") 
 
 def process_output(host,output,h,e):
         output.write("\n========= RESULTS ==========")
@@ -94,6 +93,8 @@ def process_https(args,host,output):
 def process_requests(args):
     with open(args.file,"r") as file:
         hosts = file.readlines()
+        if not args.output:
+            args.output="output_file.txt"
         with open(args.output,'w') as output:
             for host in hosts:
                 process_http(args,host,output)
